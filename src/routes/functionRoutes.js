@@ -25,6 +25,39 @@ const FunctionModel = require('../models/functionModel');
 
 /**
  * @swagger
+ * /api/functions:
+ *   post:
+ *     summary: Create a new function
+ *     tags: [Functions]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Function'
+ *     responses:
+ *       200:
+ *         description: The function was successfully created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Function'
+ *       500:
+ *         description: Some server error
+ */
+
+router.post('/', async (req, res) => {
+  try {
+    const functionModel = new FunctionModel(req.body);
+    await functionModel.save();
+    res.status(200).json(functionModel);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * @swagger
  * /api/functions/{id}:
  *   put:
  *     summary: Update an existing function

@@ -3,20 +3,16 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const functionRoutes = require('../routes/functionRoutes');
+const connectDB = require('../config/db');
+const { expect } = require('chai');
 
 const app = express();
 app.use(bodyParser.json());
 app.use('/api/functions', functionRoutes);
 
 describe('Function Routes Tests', () => {
-  beforeAll((done) => {
-    mongoose.connect('mongodb://localhost:27017/sportspulse_test', { useNewUrlParser: true, useUnifiedTopology: true });
-    const db = mongoose.connection;
-    db.on('error', console.error.bind(console, 'connection error'));
-    db.once('open', () => {
-      console.log('We are connected to test database!');
-      done();
-    });
+  beforeAll(async () => {
+    await connectDB();
   });
 
   afterAll((done) => {
@@ -31,20 +27,14 @@ describe('Function Routes Tests', () => {
       description: 'This is a test function',
     };
 
-    console.log('Function Data:', functionData);
+    const res = await request(app)
+      .post('/api/functions')
+      .send(functionData)
+      .expect(200);
 
-    try {
-      const res = await request(app)
-        .post('/api/functions')
-        .send(functionData)
-        .expect(200);
+    console.log('Response:', res.body);
 
-      console.log('Response:', res.body);
-      expect(res.body).to.have.property('name', 'Test Function');
-      expect(res.body).to.have.property('description', 'This is a test function');
-    } catch (error) {
-      console.error('Error creating function via route:', error);
-      throw error;
-    }
+    expect(res.body).to.have.property('name', 'Test Function');
+    expect(res.body).to.have.property('description', 'This is a test function');
   });
 });
