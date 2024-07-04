@@ -8,16 +8,10 @@ const connectDB = require('./config/db');
 const app = express();
 
 app.use(bodyParser.json());
+
+connectDB();
+
 app.use('/api/functions', functionRoutes);
-
-// Swagger setup
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
-
-mongoose.connect('mongodb://localhost:27017/sportspulse', { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('MongoDB connected...'))
-  .catch(err => console.log(err));
-
-const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`Server running on port ${port}`));
 
 module.exports = app;

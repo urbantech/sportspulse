@@ -7,7 +7,7 @@ const connectDB = require('../config/db');
 describe('Function Update Tests', () => {
     let functionId;
 
-    beforeAll(async (done) => {
+    beforeAll(async () => {
         console.log('BeforeAll Hook: Started');
         try {
             console.log('Step 1: Attempting to connect to test database...');
@@ -19,14 +19,12 @@ describe('Function Update Tests', () => {
             functionId = testFunction._id;
 
             console.log('BeforeAll Hook: Completed');
-            done();
         } catch (error) {
             console.error('Error in beforeAll:', error);
-            done(error);
         }
     });
 
-    afterAll(async (done) => {
+    afterAll(async () => {
         console.log('AfterAll Hook: Started');
         try {
             console.log('Step 9: Attempting to drop test database...');
@@ -35,10 +33,8 @@ describe('Function Update Tests', () => {
             await mongoose.connection.close();
             console.log('Step 11: Database connection closed.');
             console.log('AfterAll Hook: Completed');
-            done();
         } catch (error) {
             console.error('Error in afterAll:', error);
-            done(error);
         }
     });
 
@@ -49,7 +45,7 @@ describe('Function Update Tests', () => {
             .send(updateData)
             .expect(200);
 
-        expect(response.body).toHaveProperty('name', 'Updated Function');
-        expect(response.body).toHaveProperty('description', 'This is an updated test function');
+        expect(response.body.name).to.equal('Updated Function');
+        expect(response.body.description).to.equal('This is an updated test function');
     });
 });

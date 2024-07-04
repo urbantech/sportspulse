@@ -1,53 +1,33 @@
-const express = require('express');
-const router = express.Router();
-const functionController = require('../controllers/functionController');
+const request = require('supertest');
+const app = require('../app');
+const FunctionModel = require('../models/functionModel');
+const connectDB = require('../config/db');
+const mongoose = require('mongoose');
+const { expect } = require('chai');
 
-/**
- * @swagger
- * /api/functions:
- *   post:
- *     summary: Create a new function
- *     description: Create a new function
- *     responses:
- *       201:
- *         description: Function created successfully
- *       500:
- *         description: Internal server error
- */
-router.post('/', functionController.createFunction);
+describe('Function Routes Tests', () => {
+    let server;
 
-/**
- * @swagger
- * /api/functions/{id}:
- *   put:
- *     summary: Update an existing function
- *     description: Update an existing function by ID
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: ID of the function to update
- *         schema:
- *           type: string
- *       - in: body
- *         name: function
- *         required: true
- *         description: Function data to update
- *         schema:
- *           type: object
- *           properties:
- *             name:
- *               type: string
- *             description:
- *               type: string
- *     responses:
- *       200:
- *         description: Function updated successfully
- *       404:
- *         description: Function not found
- *       500:
- *         description: Internal server error
- */
-router.put('/:id', functionController.updateFunction);
+    beforeAll(async () => {
+        await connectDB();
+        server = app.listen(4000, () => {
+            global.agent = request.agent(server);
+        });
+    });
 
-module.exports = router;
+    afterAll(async () => {
+        await mongoose.connection.db.dropDatabase();
+        await mongoose.connection.close();
+        server.close();
+    });
+
+    test('should create a new function', async () => {
+        const response = await request(app).post('/api/functions').send({
+            name: 'Test Function',
+            description: 'This is a test function',
+        }).expect(201);
+
+        expect(response.body.name).to.equal('Test Function');
+        expect(response.body.description).to.equal('This is a test function');
+    });
+});
