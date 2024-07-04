@@ -1,101 +1,53 @@
 const express = require('express');
 const router = express.Router();
-const FunctionModel = require('../models/functionModel');
-
-/**
- * @swagger
- * components:
- *   schemas:
- *     Function:
- *       type: object
- *       required:
- *         - name
- *         - description
- *       properties:
- *         name:
- *           type: string
- *           description: The name of the function
- *         description:
- *           type: string
- *           description: The description of the function
- *       example:
- *         name: Test Function
- *         description: This is a test function
- */
+const functionController = require('../controllers/functionController');
 
 /**
  * @swagger
  * /api/functions:
  *   post:
  *     summary: Create a new function
- *     tags: [Functions]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/Function'
+ *     description: Create a new function
  *     responses:
- *       200:
- *         description: The function was successfully created
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Function'
+ *       201:
+ *         description: Function created successfully
  *       500:
- *         description: Some server error
+ *         description: Internal server error
  */
-
-router.post('/', async (req, res) => {
-  try {
-    const functionModel = new FunctionModel(req.body);
-    await functionModel.save();
-    res.status(200).json(functionModel);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+router.post('/', functionController.createFunction);
 
 /**
  * @swagger
  * /api/functions/{id}:
  *   put:
  *     summary: Update an existing function
- *     tags: [Functions]
+ *     description: Update an existing function by ID
  *     parameters:
  *       - in: path
  *         name: id
+ *         required: true
+ *         description: ID of the function to update
  *         schema:
  *           type: string
+ *       - in: body
+ *         name: function
  *         required: true
- *         description: The function id
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/Function'
+ *         description: Function data to update
+ *         schema:
+ *           type: object
+ *           properties:
+ *             name:
+ *               type: string
+ *             description:
+ *               type: string
  *     responses:
  *       200:
- *         description: The function was successfully updated
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Function'
+ *         description: Function updated successfully
  *       404:
- *         description: The function was not found
+ *         description: Function not found
+ *       500:
+ *         description: Internal server error
  */
-
-router.put('/:id', async (req, res) => {
-  try {
-    const functionModel = await FunctionModel.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!functionModel) {
-      return res.status(404).json({ error: 'Function not found' });
-    }
-    res.status(200).json(functionModel);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+router.put('/:id', functionController.updateFunction);
 
 module.exports = router;
